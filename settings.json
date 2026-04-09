@@ -1,6 +1,6 @@
 {
-    "WIFI_SSID": "theo",
-    "WIFI_PASSWORD": "21040672bill",
+    "WIFI_SSID": "",
+    "WIFI_PASSWORD": "",
     "LED_PIN": 21,
     "NUM_LEDS": 10,
     "SENSOR_PIN": 22,
