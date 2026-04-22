@@ -3,7 +3,7 @@ import machine, network, time, json, ntptime, dht
 from machine import Pin
 from neopixel import NeoPixel
 
-# --- Φόρτωση Ρυθμίσεων από JSON ---
+# --- Φόρτωση Ρυθμίσεων από το αρχείο JSON ---
 try:
     with open("settings.json", "r") as f:
         config = json.load(f)
@@ -12,11 +12,8 @@ except Exception as e:
 
 np = NeoPixel(Pin(config["LED_PIN"]), config["NUM_LEDS"])
 sensor = dht.DHT22(Pin(config["SENSOR_PIN"]))
-LOG_FILE = config["LOG_FILE"]
 NUM_LEDS = config["NUM_LEDS"]
 
-ram_logs = []
-last_save_hour = -1
 state = {
     "led_on": True,
     "auto": True,
@@ -27,6 +24,7 @@ state = {
 }
 current = [0,0,0]
 
+# Συνάρτηση για την σύνδεση στο WIFI
 async def connect_wifi():
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
@@ -37,8 +35,7 @@ async def connect_wifi():
         print(".", end="")
         await asyncio.sleep(1)
     
-    # Λήψη των ρυθμίσεων δικτύου
-    ip_address = wlan.ifconfig()[0]
+    ip_address = wlan.ifconfig()[0] # Λήψη των ρυθμίσεων δικτύου
     
     print("\n" + "="*30)
     print("Συνδέθηκε επιτυχώς!")
@@ -51,6 +48,7 @@ async def connect_wifi():
     except:
         print("Αποτυχία συγχρονισμού NTP.")
 
+# Συνάρτηση λήψης ώρας Ελλάδας
 def get_greek_time():
     # Λήψη UTC χρόνου από το σύστημα
     t = time.localtime() # (year, month, mday, hour, minute, second, weekday, yearday)
@@ -58,12 +56,16 @@ def get_greek_time():
     # Η Ελλάδα είναι UTC+2 το χειμώνα και UTC+3 το καλοκαίρι
     # Από Απρίλιο έως Οκτώβριο θερινή ώρα
     # Για απόλυτη ακρίβεια χρειάζεται έλεγχος τελευταίας Κυριακής
-    offset = 3 if 3 < t[1] < 11 else 2
+    if 3 < t[1] < 11:
+        offset = 3
+    else:
+        offset = 2
     
     # Δημιουργία timestamp, πρόσθεση των ωρών και μετατροπή ξανά σε tuple
     greek_seconds = time.mktime(t) + (offset * 3600)
     return time.localtime(greek_seconds)
 
+# Συνάρτηση υπολογισμού χρώματος LED, ανάλογα με την ώρα
 def get_sun_color(hour, minute):
     now = hour * 60 + minute # Μετατροπή της ώρας σε λεπτά (0-1439)
     #print (now)
@@ -88,69 +90,39 @@ def get_sun_color(hour, minute):
     else: # 20:00 - 00:00: Νύχτα
         return [15, 15, 40]
 
+# Συνάρτηση χειρισμού LED
 async def led_task():
     global current
     while True:
         if not state["led_on"]:
             target = [0, 0, 0]
-        elif state["auto"]:
+        elif state["auto"]: # Αυτόματη λειτουργία
             t = get_greek_time() # Λήψη πραγματικής ώρας
             #print ('Ώρα:',t)
             target = get_sun_color(t[3], t[4])
-        else:
-            # Χειροκίνητη λειτουργία
+        else: # Χειροκίνητη λειτουργία
             target = [int(c * state["brightness"]) for c in state["manual_color"]]
 
-        # Ομαλή μετάβαση από το ένα χρώμα στο άλλο
-        # Με αλλαγή της τιμής 0.05 μπορούμε να ελέγξουμε την ταχύτητα μετάβασης
-        for i in range(3):
-            diff = target[i] - current[i]
-            if abs(diff) < 1:
-                current[i] = target[i]
-            else:
-                current[i] += diff * 0.02
-
         # Ενημέρωση των LED
-        color = (int(current[0]), int(current[1]), int(current[2]))
+        color = (int(target[0]), int(target[1]), int(target[2]))
         #print('Χρώμα:',color)
-        for i in range(NUM_LEDS):
+        for i in range(NUM_LEDS): 
             np[i] = color
-        np.write()
+        np.write() # Αποστολή του χρώματος στα LED
         
         await asyncio.sleep_ms(50)
 
+# Συνάρτηση λήψης τιμών από τον αισθητήρα
 async def sensor_task():
-    global last_save_hour, ram_logs
     while True:
         try:
-            sensor.measure()
+            sensor.measure() # Λήψη μετρήσεων από τον αισθητήρα
             state["temperature"] = round(sensor.temperature(), 1)
-            state["humidity"] = round(sensor.humidity(), 1)
-            
-            # Αποθήκευση μετρήσεων στη RAM
-            entry = {"temp": state["temperature"], "hum": state["humidity"]}
-            ram_logs.append(entry)
-            if len(ram_logs) > 300:
-                ram_logs.pop(0)
-
-            # Αποθήκευση των μετρήσεων στη Flash μία φορά την ώρα
-            current_hour = get_greek_time()[3]
-            if current_hour != last_save_hour:
-                save_logs_to_file()
-                last_save_hour = current_hour
-                
+            state["humidity"] = round(sensor.humidity(), 1)         
         except Exception as e:
             print("Sensor error:", e)
             
         await asyncio.sleep(30)
-
-def save_logs_to_file():
-    try:
-        with open(LOG_FILE, "w") as f:
-            json.dump(ram_logs, f)
-        print("Logs saved to Flash")
-    except Exception as e:
-        print("File save error:", e)
 
 async def serve(reader, writer):
     try:
@@ -174,8 +146,6 @@ async def serve(reader, writer):
             res = {} # Αυτή η μεταβλητή πρέπει να γεμίσει
             if path == "/api/state":
                 res = state
-            elif path == "/api/logs":
-                res = ram_logs # Διορθώθηκε από res_data σε res
             elif path == "/api/toggle":
                 state["led_on"] = not state["led_on"]
                 res = {"led_on": state["led_on"]}

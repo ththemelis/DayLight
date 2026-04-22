@@ -45,11 +45,9 @@ async function updateData() {
         const resState = await fetch("/api/state");
         const state = await resState.json();
 
-        // Χρησιμοποιούμε προαιρετική αλυσίδα (optional chaining) για να μην κρασάρει αν λείπει ένα ID
         if(document.getElementById("temp")) document.getElementById("temp").innerText = state.temperature.toFixed(1);
         if(document.getElementById("hum")) document.getElementById("hum").innerText = state.humidity.toFixed(1);
         
-        // Έλεγχος για το ID του mode (δοκιμάζει και τα δύο πιθανά IDs)
         const modeEl = document.getElementById("mode") || document.getElementById("mode-text");
         if(modeEl) modeEl.innerText = state.auto ? "AUTO" : "MANUAL";
 
@@ -58,25 +56,6 @@ async function updateData() {
             controls.style.opacity = state.auto ? "0.3" : "1";
             controls.style.pointerEvents = state.auto ? "none" : "all";
         }
-
-        // Ενημέρωση Γραφήματος
-const resLogs = await fetch("/api/logs");
-        if (!resLogs.ok) throw new Error("Logs not found"); // Έλεγχος αν η απάντηση είναι οκ
-        
-        const logs = await resLogs.json();
-if (logs && logs.length > 0) {
-    const lastLogs = logs.slice(-30);
-    
-    // Ενημέρωση Labels
-    monitorChart.data.labels = lastLogs.map(() => ""); 
-    
-    // ΕΔΩ ΕΙΝΑΙ ΤΟ ΚΡΙΣΙΜΟ ΣΗΜΕΙΟ:
-    // Πρέπει το l.temp να αντιστοιχεί στο "temp" του main.py
-    monitorChart.data.datasets[0].data = lastLogs.map(l => parseFloat(l.temp));
-    monitorChart.data.datasets[1].data = lastLogs.map(l => parseFloat(l.hum));
-    
-    monitorChart.update('none');
-}
     } catch (e) {
         console.error("Update error:", e);
     }
@@ -107,7 +86,6 @@ function setupEvents() {
 
 // 4. Εκκίνηση
 window.onload = () => {
-    initChart();
     setupEvents();
     updateData();
     setInterval(updateData, 5000);

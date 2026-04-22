@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pico W Monitor</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>ΕΠΑΛ Καστοριάς - Daylight Controller</title>
     <style>
         :root {
             --bg: #121212;
@@ -26,7 +25,8 @@
             width: 100%;
             max-width: 450px;
         }
-        h1 { font-size: 1.4rem; text-align: center; color: var(--accent); margin-bottom: 20px; }
+        h1 { font-size: 2.5rem; text-align: center; color: var(--accent); margin-bottom: 20px; }
+        h2 { font-size: 2rem; text-align: center; color: var(--accent); margin-bottom: 20px; }
         
         .card {
             background: var(--card);
@@ -45,11 +45,6 @@
         .stat-val { font-size: 1.8rem; font-weight: bold; color: var(--accent); }
         .stat-label { font-size: 0.8rem; opacity: 0.7; text-transform: uppercase; }
         
-        #chart-container {
-            height: 220px;
-            margin-top: 10px;
-        }
-
         button {
             width: 100%;
             padding: 15px;
@@ -91,6 +86,7 @@
 
     <div class="container">
         <h1>ΕΠΑΛ Καστοριάς</h1>
+        <h2>Ελεγκτής φωτός</h2>
 
         <div class="status-bar">
             Λειτουργία: <span id="mode">--</span>
@@ -106,9 +102,6 @@
                     <div class="stat-label">Υγρασία</div>
                     <div class="stat-val"><span id="hum">--</span>%</div>
                 </div>
-            </div>
-            <div id="chart-container">
-                <canvas id="tempChart"></canvas>
             </div>
         </div>
 

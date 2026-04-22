@@ -2,7 +2,6 @@
     "WIFI_SSID": "",
     "WIFI_PASSWORD": "",
     "LED_PIN": 21,
-    "NUM_LEDS": 10,
+    "NUM_LEDS": 100,
     "SENSOR_PIN": 22,
-    "LOG_FILE": "log.json"
 }
