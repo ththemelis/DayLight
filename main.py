@@ -42,7 +42,7 @@ async def connect_wifi():
     
     print("\n" + "="*30)
     print("Συνδέθηκε επιτυχώς!")
-    print(f"Διέυθυνση IP: http://{ip_address}")
+    print(f"Διεύθυνση IP: http://{ip_address}")
     print("="*30)
     
     try: # Συγχρονισμός ώρας μέσω NTP
@@ -67,16 +67,26 @@ def get_greek_time():
 def get_sun_color(hour, minute):
     now = hour * 60 + minute # Μετατροπή της ώρας σε λεπτά (0-1439)
     #print (now)
-    if now < 360:      # 00:00 - 06:00: Βαθύ Μπλε (Νύχτα)
-        return [0, 0, 15]
-    elif now < 480:    # 06:00 - 08:00: Ανατολή (Πορτοκαλί)
-        return [180, 60, 0]
-    elif now < 1080:   # 08:00 - 18:00: Φως Ημέρας (Θερμό Λευκό)
-        return [210, 210, 160]
-    elif now < 1200:   # 18:00 - 20:00: Δύση (Κόκκινο/Πορτοκαλί)
-        return [180, 40, 0]
-    else:              # 20:00 - 00:00: Νύχτα
-        return [0, 0, 15]
+    if now < 300:      # 00:00 - 05:00: (Βαθιά Νύχτα)
+        return [5, 5, 20]
+    elif now < 390:    # 05:00 - 06:30: (Λυκαυγές)
+        return [40, 40, 80]
+    elif now < 450:   # 06:30 - 07:30: (Ανατολή)
+        return [255, 140, 40]
+    elif now < 570:   # 07:30 - 09:30: ()
+        return [255, 210, 150]
+    elif now < 720:   # 09:30 - 12:00: ()
+        return [255, 245, 230]
+    elif now < 900:   # 12:30 - 15:00: ()
+        return [255, 255, 255]
+    elif now < 1080:   # 15:00 - 18:00: ()
+        return [255, 240, 210]
+    elif now < 1170:   # 18:00 - 19:30: ()
+        return [255, 120, 20]
+    elif now < 1260:   # 19:30 - 21:00: ()
+        return [80, 50, 100]
+    else: # 20:00 - 00:00: Νύχτα
+        return [15, 15, 40]
 
 async def led_task():
     global current
@@ -98,7 +108,7 @@ async def led_task():
             if abs(diff) < 1:
                 current[i] = target[i]
             else:
-                current[i] += diff * 0.05
+                current[i] += diff * 0.02
 
         # Ενημέρωση των LED
         color = (int(current[0]), int(current[1]), int(current[2]))
