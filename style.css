@@ -1,11 +1,4 @@
-<!DOCTYPE html>
-<html lang="el">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ΕΠΑΛ Καστοριάς - Daylight Controller</title>
-    <style>
-            :root {
+        :root {
             --bg: #121212;
             --card: #1e1e1e;
             --accent: #00e5ff;
@@ -80,43 +73,3 @@
             font-weight: bold;
         }
         #mode { color: var(--orange); }
-    </style>
-</head>
-<body>
-
-    <div class="container">
-        <h1>ΕΠΑΛ Καστοριάς</h1>
-        <h2>Ελεγκτής φωτός</h2>
-
-        <div class="status-bar">
-            Λειτουργία: <span id="mode">--</span>
-        </div>
-
-        <div class="card">
-            <div class="stats-grid">
-                <div>
-                    <div class="stat-label">Θερμοκρασία</div>
-                    <div class="stat-val"><span id="temp">--</span>°C</div>
-                </div>
-                <div>
-                    <div class="stat-label">Υγρασία</div>
-                    <div class="stat-val"><span id="hum">--</span>%</div>
-                </div>
-            </div>
-        </div>
-
-        <button id="toggle">ON / OFF (STOP)</button>
-        <button id="auto">Εναλλαγή Auto Mode</button>
-
-        <div id="manual-controls" class="card">
-            <label>Φωτεινότητα</label>
-            <input type="range" id="brightness" min="0" max="1" step="0.05">
-            
-            <label>Χρώμα LED</label>
-            <input type="color" id="color-picker" value="#ffffff">
-        </div>
-    </div>
-
-    <script src="app.js"></script>
-</body>
-</html>

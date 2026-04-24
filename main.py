@@ -120,10 +120,11 @@ async def sensor_task():
             state["temperature"] = round(sensor.temperature(), 1)
             state["humidity"] = round(sensor.humidity(), 1)         
         except Exception as e:
-            print("Sensor error:", e)
+            print("Πρόβλημα αισθητήρα:", e)
             
         await asyncio.sleep(30)
 
+# Συνάρτηση Web Server
 async def serve(reader, writer):
     try:
         line = await reader.readline()
@@ -174,6 +175,7 @@ async def serve(reader, writer):
         await writer.aclose()
     except: pass
 
+# Συνάρτηση κυρίως προγράμματος
 async def main():
     await connect_wifi()
     asyncio.create_task(led_task())
@@ -182,6 +184,7 @@ async def main():
     while True:
         await asyncio.sleep(1)
 
+# Κύριο πρόγραμμα
 try:
     asyncio.run(main())
 except KeyboardInterrupt:
